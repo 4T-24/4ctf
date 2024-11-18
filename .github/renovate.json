@@ -1,21 +1,26 @@
 {
-    "extends": [
-      "config:base"
-    ],
-    "labels": ["dependencies"],
-    "prConcurrentLimit": 5,
-    "dependencyDashboard": true,
-    "automerge": true,
-    "automergeType": "pr",
-    "packageRules": [
-      {
-        "matchDepTypes": ["devDependencies"],
-        "automerge": true
-      },
-      {
-        "matchUpdateTypes": ["major"],
-        "enabled": false
-      }
-    ]
-  }
-  
+  "extends": [
+    "config:recommended"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "prConcurrentLimit": 5,
+  "dependencyDashboard": true,
+  "automerge": true,
+  "automergeType": "pr",
+  "packageRules": [
+    {
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    }
+  ]
+}
