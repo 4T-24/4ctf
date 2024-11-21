@@ -12,8 +12,7 @@
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/4t-24/4ctf
-    cd 4ctf
+    git clone https://github.com/4t-24/4ctf && cd 4ctf
     ```
 
 2. Start the development environment:
