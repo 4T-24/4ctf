@@ -10,29 +10,48 @@ jobs:
   deployment:
     name: Deploy to production
     runs-on: self-hosted
-    environment: gh-pages
-    concurrency: gh-pages
+    # environment: gh-pages
+    # concurrency: gh-pages
     permissions:
       contents: read
       packages: write
     steps:
+      - name: Create Deployment
+        id: create_deployment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create a deployment
+          response=$(curl -s -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/deployments \
+            -d '{
+              "ref": "'${{ github.ref }}'",
+              "environment": "production",
+              "description": "Deploying to production",
+              "auto_merge": false,
+              "required_contexts": []
+            }')
+          echo $response | jq
+          echo "deployment_id=$(echo $response | jq -r .id)" >> $GITHUB_ENV
+
       - name: Deploy to production
         run: curl -X GET ${{ secrets.DEPLOY_URL }}
 
-      - name: Report Success
-        if: success()
-        uses: actions/github-script@v2
-        with:
-          script: |
-            const deployment = context.payload.deployment;
-
-            await github.repos.createDeploymentStatus({
-                ...context.repo,
-                deployment_id: deployment.id,
-                state: 'success',
-                environment: "gh-pages",
-                environment_url: "https://4ctf.4ts.fr/",
-                log_url: `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
-                mediaType: {
-                  previews: ['ant-man']},
-            });
+      - name: Update Deployment Status
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOY_URL: https://4ctf.4ts.fr/
+        run: |
+          curl -s -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/deployments/${{ env.deployment_id }}/statuses \
+            -d '{
+              "state": "success",
+              "environment": "production",
+              "log_url": "'"${DEPLOY_URL}"'",
+              "description": "Deployment successful",
+              "environment_url": "'"${DEPLOY_URL}"'"
+            }'
