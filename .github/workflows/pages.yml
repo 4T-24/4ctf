@@ -1,6 +1,11 @@
 name: Deploy Docs
 
 on:
+  workflow_run:
+    workflows:
+      - Build and Deploy Docs  # Name of the primary workflow
+    types:
+      - completed  # Runs after the primary workflow finishes successfully
   push:
     branches:
       - gh-pages
@@ -10,11 +15,8 @@ jobs:
   deployment:
     name: Deploy to production
     runs-on: self-hosted
-    # environment: gh-pages
-    # concurrency: gh-pages
     permissions:
       contents: read
-      packages: write
     steps:
       - name: Create Deployment
         id: create_deployment
