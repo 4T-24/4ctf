@@ -9,6 +9,7 @@
   "dependencyDashboard": true,
   "automerge": true,
   "automergeType": "pr",
+  "pinDigests": true,
   "packageRules": [
     {
       "matchDepTypes": [
