@@ -28,15 +28,15 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/deployments \
             -d '{
               "ref": "'${{ github.ref }}'",
-              "environment": "production",
-              "description": "Deploying to production",
+              "environment": "gh-pages",
+              "description": "Deploying self-hosted pages",
               "auto_merge": false,
               "required_contexts": []
             }')
           echo $response | jq
           echo "deployment_id=$(echo $response | jq -r .id)" >> $GITHUB_ENV
 
-      - name: Deploy to production
+      - name: Deploy Pages
         run: curl -X GET ${{ secrets.DEPLOY_URL }}
 
       - name: Update Deployment Status
@@ -50,7 +50,7 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/deployments/${{ env.deployment_id }}/statuses \
             -d '{
               "state": "success",
-              "environment": "production",
+              "environment": "gh-pages",
               "log_url": "'"${DEPLOY_URL}"'",
               "description": "Deployment successful",
               "environment_url": "'"${DEPLOY_URL}"'"
