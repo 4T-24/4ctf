@@ -44,6 +44,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: rossjrw/pr-preview-action@v1
         with:
+          custom-url: 4ctf.4ts.fr
           source-dir: ./docs/site
           
       # Deploy to GitHub Pages only when the main branch
