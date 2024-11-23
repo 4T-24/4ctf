@@ -1,0 +1,21 @@
+name: Deploy Docs
+
+on:
+  push:
+    branches:
+      - gh-pages
+  workflow_dispatch:   # Allow manual triggering
+
+jobs:
+  deployment:
+    needs: docker
+    name: Deploy to production
+    runs-on: self-hosted
+    environment: gh-pages
+    concurrency: gh-pages
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Deploy to production
+        run: curl -X GET ${{ secrets.DEPLOY_URL }}
