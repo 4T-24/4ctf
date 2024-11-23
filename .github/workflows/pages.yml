@@ -8,7 +8,6 @@ on:
 
 jobs:
   deployment:
-    needs: docker
     name: Deploy to production
     runs-on: self-hosted
     environment: gh-pages
