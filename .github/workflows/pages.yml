@@ -10,39 +10,29 @@ jobs:
   deployment:
     name: Deploy to production
     runs-on: self-hosted
+    environment: gh-pages
+    concurrency: gh-pages
     permissions:
       contents: read
       packages: write
     steps:
-      - name: Create GitHub Deployment
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const { data: deployment } = await github.repos.createDeployment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: context.ref,
-              environment: "gh-pages",
-              description: "Deployment to Self-Hosted GitHub Pages",
-              auto_merge: false,
-              required_contexts: []
-            });
-
-            console.log(`Created deployment: ${deployment.id}`);
-            return deployment.id;
-
       - name: Deploy to production
         run: curl -X GET ${{ secrets.DEPLOY_URL }}
 
-      - name: Update Deployment Status
-        uses: actions/github-script@v5
+      - name: Report Success
+        if: success()
+        uses: actions/github-script@v2
         with:
           script: |
+            const deployment = context.payload.deployment;
+
             await github.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: ${{ steps.create.outputs.result }},
-              state: "success",
-              environment_url: "https://4ctf.4ts.fr/",
-              description: "Deployed to Self-Hosted GitHub Pages"
+                ...context.repo,
+                deployment_id: deployment.id,
+                state: 'success',
+                environment: "gh-pages",
+                environment_url: "https://4ctf.4ts.fr/",
+                log_url: `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
+                mediaType: {
+                  previews: ['ant-man']},
             });
