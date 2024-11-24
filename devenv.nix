@@ -60,6 +60,7 @@
     # .env
     if [ ! -f ./back/.env ]; then
       cp ./back/.env.example ./back/.env
+      cp ./back/config.yaml.example ./back/config.yaml
       printf "\033[0;32mCopied .env.example to .env, please fill it yourself if necessary\033[0m\n"
     fi
     # load .env
