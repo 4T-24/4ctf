@@ -1,11 +1,10 @@
 <template>
-  <div>
-    <NuxtRouteAnnouncer />
-    <NuxtWelcome />
-  </div>
+  <NuxtLayout> 
+    <NuxtPage />
+  </NuxtLayout>
 </template>
 <script setup lang="ts">
-import config from '@/data/config.yaml'
+import config from "@/data/config.yaml";
 
-console.debug(config.project)
+console.debug(config.project);
 </script>
