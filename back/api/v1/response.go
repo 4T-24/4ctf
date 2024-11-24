@@ -1,6 +1,9 @@
 package v1
 
-import "gopkg.in/validator.v2"
+import (
+	"github.com/savsgio/atreugo/v11"
+	"gopkg.in/validator.v2"
+)
 
 type ResponseError struct {
 	Field   string `json:"field,omitempty"`
@@ -13,18 +16,30 @@ type Response[K any] struct {
 	Errors []ResponseError `json:"errors,omitempty"`
 }
 
-func NewResponse[K any](status int, data K) Response[K] {
-	return Response[K]{
+func Success[K any](status int, data K) *Response[any] {
+	var dataInterface any = data
+	return &Response[any]{
 		Status: status,
-		Data:   &data,
+		Data:   &dataInterface,
 	}
 }
 
-func NewErrorResponse(status int, errors []ResponseError) Response[interface{}] {
-	return Response[interface{}]{
+func Errors(status int, errors []ResponseError) *Response[any] {
+	return &Response[any]{
 		Status: status,
 		Errors: errors,
 	}
+}
+
+func Error(status int, message string) *Response[any] {
+	return &Response[any]{
+		Status: status,
+		Errors: []ResponseError{{Message: message}},
+	}
+}
+
+func (response *Response[K]) Send(ctx *atreugo.RequestCtx) error {
+	return ctx.JSONResponse(response, response.Status)
 }
 
 func validatorErrorToResponseError(err error) []ResponseError {

@@ -6,6 +6,7 @@ import (
 	"4ctf/views"
 	"database/sql"
 	"errors"
+	"net/http"
 	"time"
 
 	"github.com/savsgio/atreugo/v11"
@@ -15,10 +16,10 @@ import (
 func setupAuthRoutes(api *Api, router *atreugo.Router) {
 	group := router.NewGroupPath("/auth")
 
-	group.POST("/login", WithDefaults(api, WithBody(login)))
-	group.POST("/register", WithDefaults(api, WithBody(register)))
-	group.GET("/logout", WithDefaults(api, logout))
-	group.GET("/me", WithDefaults(api, WithValidSession(profile)))
+	group.POST("/login", Default(api, Body(login)))
+	group.POST("/register", Default(api, Body(register)))
+	group.GET("/logout", Default(api, logout))
+	group.GET("/me", Default(api, RequireValidSession(profile)))
 }
 
 type LoginRequest struct {
@@ -26,8 +27,8 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"max=256,password"`
 }
 
-func login(api *Api) func(ctx *atreugo.RequestCtx, lr *LoginRequest) error {
-	return func(ctx *atreugo.RequestCtx, lr *LoginRequest) error {
+func login(api *Api) func(ctx *atreugo.RequestCtx, lr *LoginRequest) *Response[any] {
+	return func(ctx *atreugo.RequestCtx, lr *LoginRequest) *Response[any] {
 		// Check if the user exists in the database
 		user, err := models.Users(models.UserWhere.Username.EQ(lr.Username)).OneG(ctx)
 		if err != nil {
@@ -36,13 +37,13 @@ func login(api *Api) func(ctx *atreugo.RequestCtx, lr *LoginRequest) error {
 					WithField("username", lr.Username).
 					WithError(err).
 					Warn("cannot find user because it does not exist")
-				return ctx.JSONResponse(NewErrorResponse(404, []ResponseError{{Message: "User not found"}}))
+				return Error(http.StatusNotFound, "Invalid credentials")
 			} else {
 				api.
 					WithField("username", lr.Username).
 					WithError(err).
 					Error("cannot find user")
-				return ctx.JSONResponse(NewErrorResponse(500, []ResponseError{{Message: "Internal server error"}}))
+				return Error(http.StatusInternalServerError, "Internal server error")
 			}
 		}
 
@@ -51,7 +52,7 @@ func login(api *Api) func(ctx *atreugo.RequestCtx, lr *LoginRequest) error {
 			api.
 				WithField("username", lr.Username).
 				Warn("invalid password")
-			return ctx.JSONResponse(NewErrorResponse(401, []ResponseError{{Message: "Invalid credentials"}}))
+			return Error(http.StatusUnauthorized, "Invalid credentials")
 		}
 
 		// Create a new userSession, this is used to link the cookie to the session, and not use the DB provider
@@ -66,14 +67,14 @@ func login(api *Api) func(ctx *atreugo.RequestCtx, lr *LoginRequest) error {
 				WithField("username", lr.Username).
 				WithError(err).
 				Error("cannot create user session")
-			return ctx.JSONResponse(NewErrorResponse(500, []ResponseError{{Message: "Internal server error"}}))
+			return Error(http.StatusInternalServerError, "Internal server error")
 		}
 
 		session := ctx.UserValue("session").(*Session)
 		session.Valid = true
 		session.UserSessionID = userSession.ID
 
-		return ctx.JSONResponse(NewResponse(200, true))
+		return Success(http.StatusOK, true)
 	}
 }
 
@@ -83,8 +84,8 @@ type RegisterRequest struct {
 	Password string `json:"password" validate:"max=256,password"`
 }
 
-func register(api *Api) func(ctx *atreugo.RequestCtx, rr *RegisterRequest) error {
-	return func(ctx *atreugo.RequestCtx, rr *RegisterRequest) error {
+func register(api *Api) func(ctx *atreugo.RequestCtx, rr *RegisterRequest) *Response[any] {
+	return func(ctx *atreugo.RequestCtx, rr *RegisterRequest) *Response[any] {
 		// Check if the username or email already exists
 		exists, err := models.Users(models.UserWhere.Username.EQ(rr.Username)).ExistsG(ctx)
 		if err != nil {
@@ -92,10 +93,10 @@ func register(api *Api) func(ctx *atreugo.RequestCtx, rr *RegisterRequest) error
 				WithField("username", rr.Username).
 				WithError(err).
 				Error("cannot check user existence")
-			return ctx.JSONResponse(NewErrorResponse(500, []ResponseError{{Message: "Internal server error"}}))
+			return Error(http.StatusInternalServerError, "Internal server error")
 		}
 		if exists {
-			return ctx.JSONResponse(NewErrorResponse(400, []ResponseError{{Message: "Username already taken"}}))
+			return Error(400, "Username already taken")
 		}
 
 		exists, err = models.Users(models.UserWhere.Email.EQ(rr.Email)).ExistsG(ctx)
@@ -104,10 +105,10 @@ func register(api *Api) func(ctx *atreugo.RequestCtx, rr *RegisterRequest) error
 				WithField("email", rr.Email).
 				WithError(err).
 				Error("cannot check email existence")
-			return ctx.JSONResponse(NewErrorResponse(500, []ResponseError{{Message: "Internal server error"}}))
+			return Error(http.StatusInternalServerError, "Internal server error")
 		}
 		if exists {
-			return ctx.JSONResponse(NewErrorResponse(400, []ResponseError{{Message: "Email already in use"}}))
+			return Error(http.StatusBadRequest, "Email already in use")
 		}
 
 		// Hash the password
@@ -124,27 +125,27 @@ func register(api *Api) func(ctx *atreugo.RequestCtx, rr *RegisterRequest) error
 				WithField("username", rr.Username).
 				WithError(err).
 				Error("cannot create user")
-			return ctx.JSONResponse(NewErrorResponse(500, []ResponseError{{Message: "Internal server error"}}))
+			return Error(http.StatusInternalServerError, "Internal server error")
 		}
 
 		api.
 			WithField("username", rr.Username).
 			Info("user registered successfully")
 
-		return ctx.JSONResponse(NewResponse(201, true), 201)
+		return Success(http.StatusCreated, true)
 	}
 }
 
-func logout(api *Api) func(ctx *atreugo.RequestCtx) error {
-	return func(ctx *atreugo.RequestCtx) error {
+func logout(api *Api) func(ctx *atreugo.RequestCtx) *Response[any] {
+	return func(ctx *atreugo.RequestCtx) *Response[any] {
 		api.session.DeleteSession(ctx.RequestCtx)
 
-		return ctx.JSONResponse(NewResponse(200, true))
+		return Success(200, true)
 	}
 }
 
-func profile(api *Api) func(ctx *atreugo.RequestCtx) error {
-	return func(ctx *atreugo.RequestCtx) error {
+func profile(api *Api) func(ctx *atreugo.RequestCtx) *Response[any] {
+	return func(ctx *atreugo.RequestCtx) *Response[any] {
 		session := ctx.UserValue("session").(*Session)
 
 		userSession, err := models.UserSessions(models.UserSessionWhere.ID.EQ(session.UserSessionID)).OneG(ctx)
@@ -153,7 +154,7 @@ func profile(api *Api) func(ctx *atreugo.RequestCtx) error {
 				WithField("userSessionID", session.UserSessionID).
 				WithError(err).
 				Error("cannot find user session")
-			return ctx.JSONResponse(NewErrorResponse(404, []ResponseError{{Message: "User not found"}}))
+			return Error(http.StatusNotFound, "User not found")
 		}
 
 		user, err := userSession.User().OneG(ctx)
@@ -162,9 +163,9 @@ func profile(api *Api) func(ctx *atreugo.RequestCtx) error {
 				WithField("userSessionID", session.UserSessionID).
 				WithError(err).
 				Error("cannot find user")
-			return ctx.JSONResponse(NewErrorResponse(404, []ResponseError{{Message: "User not found"}}))
+			return Error(http.StatusNotFound, "User not found")
 		}
 
-		return ctx.JSONResponse(NewResponse(200, views.Return(user, user, views.UserView(user))))
+		return Success(http.StatusOK, views.Return(user, user, views.UserView(user)))
 	}
 }

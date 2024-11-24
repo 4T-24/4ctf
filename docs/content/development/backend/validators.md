@@ -14,7 +14,7 @@ Here’s an example of a `RegisterRequest` struct with validation rules:
 type RegisterRequest struct {
     Email    string `json:"email" validate:"nonzero,email"`
     Username string `json:"username" validate:"min=2,max=40,regexp=^[a-zA-Z]*$"`
-    Password string `json:"password" validate:"max=40,password"`
+    Password string `json:"password" validate:"max=256,password"`
 }
 ```
 
@@ -22,7 +22,7 @@ In this example:
 
 - `Email` must be non-empty and a valid email format.
 - `Username` must be between 2 and 40 characters long and only contain alphabetic characters.
-- `Password` must not exceed 40 characters and must meet certain password criteria (such as length, complexity, etc.).
+- `Password` must not exceed 256 characters and must meet certain password criteria (such as length, type).
 
 The validation rules are specified using tags in the struct definition, following the syntax supported by the validator library.
 

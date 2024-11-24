@@ -6,13 +6,19 @@ import (
 	"strings"
 )
 
-// Return filters the fields of a struct based on the `visible` tag
-// It sets the fields to nil if the viewer is not allowed to see them
+// Return filters the fields of a struct based on the `visible` tag,
+// it sets the fields to nil if the viewer is not allowed to see them
+//
 // The viewer is allowed to see the field if the `visible` tag contains:
+//
 // - `user` and the viewer is the owner of the data
+//
 // - `admin` and the viewer is an admin
+//
 // - `other` and the viewer is not the owner of the data
+//
 // - `nobody` and the viewer is not allowed to see the field
+//
 // The owner can be nil if the data is not owned by a user
 func Return[K any](viewer *models.User, owner *models.User, data *K) *K {
 	dataValue := reflect.ValueOf(data).Elem()

@@ -2,13 +2,14 @@ package v1
 
 import (
 	"encoding/json"
+	"net/http"
 
 	"github.com/savsgio/atreugo/v11"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/validator.v2"
 )
 
-func WithDefaults(api *Api, fn func(api *Api) func(ctx *atreugo.RequestCtx) error) func(ctx *atreugo.RequestCtx) error {
+func Default(api *Api, fn func(api *Api) func(ctx *atreugo.RequestCtx) *Response[any]) func(ctx *atreugo.RequestCtx) error {
 	return func(ctx *atreugo.RequestCtx) error {
 		session, _ := api.session.GetSession(ctx.RequestCtx)
 		sessionBefore := *session
@@ -21,29 +22,33 @@ func WithDefaults(api *Api, fn func(api *Api) func(ctx *atreugo.RequestCtx) erro
 			Entry:   NewLogger(ctx),
 		}
 
-		err := fn(api)(ctx)
-		if err != nil {
-			return err
-		}
+		response := fn(api)(ctx)
 
 		// Check if the session has been updated
 		if sessionBefore != *session {
-			return api.session.SetSession(ctx.RequestCtx, session)
+			err := api.session.SetSession(ctx.RequestCtx, session)
+			if err != nil {
+				logrus.
+					WithField("request_ip", ctx.RemoteIP().String()).
+					WithError(err).
+					Error("cannot update session")
+			}
 		}
-		return nil
+
+		return response.Send(ctx)
 	}
 }
 
-func WithBody[K any](fn func(api *Api) func(ctx *atreugo.RequestCtx, body K) error) func(api *Api) func(ctx *atreugo.RequestCtx) error {
-	return func(api *Api) func(ctx *atreugo.RequestCtx) error {
-		return func(ctx *atreugo.RequestCtx) error {
+func Body[K any](fn func(api *Api) func(ctx *atreugo.RequestCtx, body K) *Response[any]) func(api *Api) func(ctx *atreugo.RequestCtx) *Response[any] {
+	return func(api *Api) func(ctx *atreugo.RequestCtx) *Response[any] {
+		return func(ctx *atreugo.RequestCtx) *Response[any] {
 			var body K
 			if err := json.Unmarshal(ctx.PostBody(), &body); err != nil {
 				logrus.
 					WithField("request_ip", ctx.RemoteIP().String()).
 					WithError(err).
 					Warn("bad request")
-				return ctx.JSONResponse(NewErrorResponse(400, []ResponseError{{Message: "Bad request"}}))
+				return Error(http.StatusBadRequest, "Bad request")
 			}
 
 			if err := validator.Validate(body); err != nil {
@@ -51,7 +56,7 @@ func WithBody[K any](fn func(api *Api) func(ctx *atreugo.RequestCtx, body K) err
 					WithField("request_ip", ctx.RemoteIP().String()).
 					WithError(err).
 					Warn("invalid request")
-				return ctx.JSONResponse(NewErrorResponse(400, validatorErrorToResponseError(err)))
+				return Errors(http.StatusBadRequest, validatorErrorToResponseError(err))
 			}
 
 			return fn(api)(ctx, body)
@@ -59,12 +64,12 @@ func WithBody[K any](fn func(api *Api) func(ctx *atreugo.RequestCtx, body K) err
 	}
 }
 
-func WithValidSession(fn func(api *Api) func(ctx *atreugo.RequestCtx) error) func(api *Api) func(ctx *atreugo.RequestCtx) error {
-	return func(api *Api) func(ctx *atreugo.RequestCtx) error {
-		return func(ctx *atreugo.RequestCtx) error {
+func RequireValidSession(fn func(api *Api) func(ctx *atreugo.RequestCtx) *Response[any]) func(api *Api) func(ctx *atreugo.RequestCtx) *Response[any] {
+	return func(api *Api) func(ctx *atreugo.RequestCtx) *Response[any] {
+		return func(ctx *atreugo.RequestCtx) *Response[any] {
 			session := ctx.UserValue("session").(*Session)
 			if !session.Valid {
-				return ctx.JSONResponse(NewErrorResponse(401, []ResponseError{{Message: "Unauthorized"}}))
+				return Error(http.StatusUnauthorized, "Unauthorized")
 			}
 
 			return fn(api)(ctx)
