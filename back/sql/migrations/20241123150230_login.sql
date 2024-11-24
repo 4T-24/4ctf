@@ -24,7 +24,6 @@ CREATE TABLE user_sessions (
     deleted_at TIMESTAMP
 );
 
-
 -- migrate:down
 DROP TABLE user_sessions;
 DROP TABLE users;
