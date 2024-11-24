@@ -1,6 +1,6 @@
 services:
   mariadb:
-    image: mariadb:11.6.2
+    image: mariadb:11.6.2@sha256:0a620383fe05d20b3cc7510ebccc6749f83f1b0f97f3030d10dd2fa199371f07
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
@@ -13,7 +13,7 @@ services:
       - "${MYSQL_PORT}:3306"
 
   phpmyadmin:
-    image: phpmyadmin:5.2
+    image: phpmyadmin:5.2@sha256:361f1188ec5ad345feade293277261b96b17f881e24b0f9d3843a5a2acf414c8
     restart: always
     environment:
       PMA_HOST: mariadb
