@@ -677,14 +677,14 @@
 <pre><code class="language-go">type RegisterRequest struct {
     Email    string `json:&quot;email&quot; validate:&quot;nonzero,email&quot;`
     Username string `json:&quot;username&quot; validate:&quot;min=2,max=40,regexp=^[a-zA-Z]*$&quot;`
-    Password string `json:&quot;password&quot; validate:&quot;max=40,password&quot;`
+    Password string `json:&quot;password&quot; validate:&quot;max=256,password&quot;`
 }
 </code></pre>
 <p>In this example:</p>
 <ul>
 <li><code>Email</code> must be non-empty and a valid email format.</li>
 <li><code>Username</code> must be between 2 and 40 characters long and only contain alphabetic characters.</li>
-<li><code>Password</code> must not exceed 40 characters and must meet certain password criteria (such as length, complexity, etc.).</li>
+<li><code>Password</code> must not exceed 256 characters and must meet certain password criteria (such as length, type).</li>
 </ul>
 <p>The validation rules are specified using tags in the struct definition, following the syntax supported by the validator library.</p>
 <h2 id="how-it-works">How It Works</h2>
