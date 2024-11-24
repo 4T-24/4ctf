@@ -44,12 +44,17 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: rossjrw/pr-preview-action@v1
         with:
+          token: ${{ secrets.DEPLOY_TOKEN }}
           custom-url: 4ctf.4ts.fr
           source-dir: ./docs/site
           
-      # Deploy to GitHub Pages only when the main branch
-      - name: Deploy to GitHub Pages
-        run : |
-          cd docs
-          mkdocs gh-deploy --force
+      - name: Deploy preview directory
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: JamesIves/github-pages-deploy-action@65b5dfd4f5bcd3a7403bbc2959c144256167464e # v4.5.0
+        with:
+          token: ${{ secrets.DEPLOY_TOKEN }}
+          folder: ./docs/site
+          commit-message: Deploy production site 🚀
+          clean: true
+          clean-exclude: .gitignore
+          force: false

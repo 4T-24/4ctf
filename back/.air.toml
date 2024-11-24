@@ -3,8 +3,7 @@ testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-  args_bin = ["serve"]
-  bin = "bin/server"
+  bin = "/bin/bash -c 'source refresh-env && bin/server serve'"
   cmd = "go build -ldflags '-s -w' -o bin/server main.go"
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "node_modules", "models", "venv"]
@@ -14,7 +13,7 @@ tmp_dir = "tmp"
   follow_symlink = false
   full_bin = ""
   include_dir = []
-  include_ext = ["go", "tpl", "tmpl", "html", "templ"]
+  include_ext = ["go", "tpl", "tmpl", "html", "templ", "env"]
   include_file = []
   kill_delay = "0s"
   log = "build-errors.log"

@@ -1,0 +1,12 @@
+output   = "models"
+wipe     = true
+no-tests = true
+add-enum-types = true
+
+[mysql]
+    dbname = "rtyop"
+    host = "127.0.0.1"
+    user = "rtyop"
+    pass = "rtyop"
+    sslmode = "false"
+    blacklist = [ "schema_migrations" ]

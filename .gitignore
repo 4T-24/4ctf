@@ -13,3 +13,7 @@ devenv.local.nix
 
 # tmp
 tmp/
+
+# env
+.env
+config.yaml
