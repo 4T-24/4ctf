@@ -140,7 +140,7 @@ func logout(api *Api) func(ctx *atreugo.RequestCtx) *Response[any] {
 	return func(ctx *atreugo.RequestCtx) *Response[any] {
 		api.session.DeleteSession(ctx.RequestCtx)
 
-		return Success(200, true)
+		return Success(http.StatusOK, true)
 	}
 }
 
