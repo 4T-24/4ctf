@@ -1,0 +1,25 @@
+FROM golang:1.23.2 AS builder
+
+# Build Go binary   
+ENV CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64
+WORKDIR /app
+COPY back/go.mod back/go.sum ./
+RUN go mod download
+COPY back/ ./
+RUN go build -o app .
+
+# Add user for scratch image and download CA certificates
+RUN useradd -u 10001 user
+RUN cp /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt.orig
+RUN update-ca-certificates
+
+# Boostrap scratch image with CA certificates and rootless user
+FROM scratch
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /app/app /app
+USER user
+EXPOSE 8080
+ENTRYPOINT ["/app"]

@@ -19,6 +19,9 @@
     start-api.exec = ''
       cd back && air && cd ..
     '';
+    build-api.exec = ''
+      docker build -t api -f ./docker/Dockerfile.back .
+    '';
     run-tests.exec = ''
       go test ./...
     '';
