@@ -54,6 +54,7 @@
     go install github.com/amacneil/dbmate@latest
     go install github.com/volatiletech/sqlboiler/v4@latest
     go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@latest
+    go install -v github.com/nicksnyder/go-i18n/v2/goi18n@latest
 
     alias refresh-env="source $(which refresh-env)"
 

@@ -1,0 +1,17 @@
+{
+    "InvalidCredentials": {
+        "message": "Invalid credentials"
+    },
+    "InternalServerError": {
+        "message": "Internal server error"
+    },
+    "UsernameAlreadyTaken": {
+        "message": "Username already taken"
+    },
+    "EmailAlreadyInUse": {
+        "message": "Email already in use"
+    },
+    "UserRegisteredSuccessfully": {
+        "message": "User registered successfully"
+    }
+}

@@ -1,9 +1,11 @@
 package v1
 
 import (
+	"4ctf/translations"
 	"encoding/json"
 	"net/http"
 
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"github.com/savsgio/atreugo/v11"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/validator.v2"
@@ -16,10 +18,13 @@ func Default(api *Api, fn func(api *Api) func(ctx *atreugo.RequestCtx) *Response
 
 		ctx.SetUserValue("session", session)
 
+		lang := string(ctx.Request.Header.Peek("Accept-Language"))
+
 		api = &Api{
-			config:  api.config,
-			session: api.session,
-			Entry:   NewLogger(ctx),
+			config:    api.config,
+			session:   api.session,
+			Entry:     NewLogger(ctx),
+			localizer: i18n.NewLocalizer(translations.Bundle, lang),
 		}
 
 		// Log the request
