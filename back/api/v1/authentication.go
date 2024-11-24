@@ -23,7 +23,7 @@ func setupAuthRoutes(api *Api, router *atreugo.Router) {
 
 type LoginRequest struct {
 	Username string `json:"username" validate:"min=2,max=40,regexp=^[a-zA-Z]*$"`
-	Password string `json:"password" validate:"max=40,password"`
+	Password string `json:"password" validate:"max=256,password"`
 }
 
 func login(api *Api) func(ctx *atreugo.RequestCtx, lr *LoginRequest) error {
@@ -31,18 +31,19 @@ func login(api *Api) func(ctx *atreugo.RequestCtx, lr *LoginRequest) error {
 		// Check if the user exists in the database
 		user, err := models.Users(models.UserWhere.Username.EQ(lr.Username)).OneG(ctx)
 		if err != nil {
-			if !errors.Is(err, sql.ErrNoRows) {
+			if errors.Is(err, sql.ErrNoRows) {
 				api.
 					WithField("username", lr.Username).
 					WithError(err).
-					Error("cannot find user")
+					Warn("cannot find user because it does not exist")
+				return ctx.JSONResponse(NewErrorResponse(404, []ResponseError{{Message: "User not found"}}))
 			} else {
 				api.
 					WithField("username", lr.Username).
 					WithError(err).
-					Warn("cannot find user")
+					Error("cannot find user")
+				return ctx.JSONResponse(NewErrorResponse(500, []ResponseError{{Message: "Internal server error"}}))
 			}
-			return ctx.JSONResponse(NewErrorResponse(404, []ResponseError{{Message: "User not found"}}))
 		}
 
 		// Check if the password is correct
@@ -50,10 +51,11 @@ func login(api *Api) func(ctx *atreugo.RequestCtx, lr *LoginRequest) error {
 			api.
 				WithField("username", lr.Username).
 				Warn("invalid password")
-			return ctx.JSONResponse(NewErrorResponse(404, []ResponseError{{Message: "User not found"}}))
+			return ctx.JSONResponse(NewErrorResponse(401, []ResponseError{{Message: "Invalid credentials"}}))
 		}
 
-		// Create a new userSession
+		// Create a new userSession, this is used to link the cookie to the session, and not use the DB provider
+		// The DB provider could break auto-generated code
 		userSession := models.UserSession{
 			UserID:    user.ID,
 			ExpiresAt: time.Now().Add(30 * 24 * time.Hour),
@@ -78,7 +80,7 @@ func login(api *Api) func(ctx *atreugo.RequestCtx, lr *LoginRequest) error {
 type RegisterRequest struct {
 	Email    string `json:"email" validate:"nonzero,email"`
 	Username string `json:"username" validate:"min=2,max=40,regexp=^[a-zA-Z]*$"`
-	Password string `json:"password" validate:"max=40,password"`
+	Password string `json:"password" validate:"max=256,password"`
 }
 
 func register(api *Api) func(ctx *atreugo.RequestCtx, rr *RegisterRequest) error {
