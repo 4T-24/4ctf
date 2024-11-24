@@ -23,7 +23,7 @@ func setupAuthRoutes(api *Api, router *atreugo.Router) {
 }
 
 type LoginRequest struct {
-	Username string `json:"username" validate:"min=2,max=40,regexp=^[a-zA-Z]*$"`
+	Username string `json:"username" validate:"min=2,max=40"`
 	Password string `json:"password" validate:"max=256,password"`
 }
 
