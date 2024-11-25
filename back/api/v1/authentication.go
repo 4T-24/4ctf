@@ -147,6 +147,6 @@ func profile(api *Api) func(ctx *atreugo.RequestCtx) *Response[any] {
 			return Error(http.StatusNotFound, api.Translate("UserNotFound"))
 		}
 
-		return Success(http.StatusOK, views.Return(user, user, views.UserView(user)))
+		return Success(http.StatusOK, views.Return(user, user, user.View()))
 	}
 }
