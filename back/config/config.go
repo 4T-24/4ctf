@@ -10,9 +10,15 @@ import (
 	"github.com/spf13/viper"
 )
 
+var (
+	EnvironmentDevelopment = "dev"
+	EnvironmentProduction  = "prod"
+)
+
 type Config struct {
 	Server struct {
-		Port int `mapstructure:"port"`
+		Environment string `mapstructure:"environment"`
+		Port        int    `mapstructure:"port"`
 
 		Key string `mapstructure:"key"`
 	} `mapstructure:"server"`
@@ -27,6 +33,14 @@ type Config struct {
 		MigrationsFolder string `mapstructure:"migrations_folder"`
 		SchemaFile       string `mapstructure:"schema_file"`
 	} `mapstructure:"mysql"`
+}
+
+func (c *Config) IsDevelopment() bool {
+	return c.Server.Environment == EnvironmentDevelopment
+}
+
+func (c *Config) IsProduction() bool {
+	return c.Server.Environment == EnvironmentProduction
 }
 
 func listStructKeys(s interface{}) ([]string, error) {

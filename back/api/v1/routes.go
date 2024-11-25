@@ -31,12 +31,21 @@ func (api *Api) Translate(messageID string) string {
 	return api.localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: messageID + ".message"})
 }
 
-func SetupRoutes(router *atreugo.Atreugo, config *config.Config) {
+func SetupRoutes(router *atreugo.Atreugo, cfg *config.Config) {
 	var api = &Api{
-		config:    config,
-		session:   utils.NewSessionManager([]byte(config.Server.Key), nil, "session", Session{}),
+		config:  cfg,
+		session: utils.NewSessionManager([]byte(cfg.Server.Key), nil, "session", Session{}),
 		localizer: i18n.NewLocalizer(translations.Bundle, "en"),
 	}
+
+	// In dev, we want CORS to allow everyone
+	if cfg.IsDevelopment() {
+		router.UseFinal(func(ctx *atreugo.RequestCtx) {
+			ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
+			ctx.Response.Header.SetBytesV("Access-Control-Allow-Origin", ctx.Request.Header.Peek("Origin"))
+		})
+	}
+
 	group := router.NewGroupPath("/api/v1")
 
 	// Validators

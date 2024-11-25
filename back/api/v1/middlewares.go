@@ -27,14 +27,20 @@ func Default(api *Api, fn func(api *Api) func(ctx *atreugo.RequestCtx) *Response
 			localizer: i18n.NewLocalizer(translations.Bundle, lang),
 		}
 
+		// Log the request
+		entry := api.WithField("request_size", ctx.Request.Header.ContentLength())
+		if len(string(ctx.URI().QueryString())) > 0 {
+			entry = entry.WithField("request_query", string(ctx.URI().QueryString()))
+		}
+		entry.Info("request received")
+
 		response := fn(api)(ctx)
 
 		// Check if the session has been updated
 		if sessionBefore != *session {
 			err := api.session.SetSession(ctx.RequestCtx, session)
 			if err != nil {
-				logrus.
-					WithField("request_ip", ctx.RemoteIP().String()).
+				api.
 					WithError(err).
 					Error("cannot update session")
 			}
