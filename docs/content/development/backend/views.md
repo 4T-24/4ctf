@@ -1,27 +1,33 @@
-# Views Package
+# Model views
 
-The `views` package provides a flexible and secure system for controlling the visibility of fields when serializing data in your API. This system ensures that different roles or contexts receive only the necessary data.
+When generated, models will produce a struct that contains all the fields of the table, and will also produce the same struct with all optional fields.
 
 ## Overview
 
 A **view** is a struct that defines which fields should be serialized and sent to the user, based on their visibility level. Each field in a view has a `visible` tag that specifies the roles or contexts in which the field should be included.
 
-For example, the `userView` struct controls the serialization of user data:
+Those tags are controlled by the comment in the SQL schema, for example:
+
+```sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY COMMENT 'visible:"admin,user,other"',
+    ...
+);
+```
+
+This will generate the following view :
 
 ```go
 type userView struct {
     ID                     *uint64      `json:"id,omitempty" visible:"admin,user,other"`
-    Username               *string      `json:"username,omitempty" visible:"admin,user,other"`
-    PasswordHash           *string      `json:"password_hash,omitempty" visible:"nobody"`
-    Email                  *string      `json:"email,omitempty" visible:"admin,user"`
-    EmailVerified          *bool        `json:"email_verified,omitempty" visible:"admin,user"`
-    EmailVerificationToken *null.String `json:"email_verification_token,omitempty" visible:"admin"`
-    IsAdmin                *bool        `json:"is_admin,omitempty" visible:"admin"`
-    IsHidden               *bool        `json:"is_hidden,omitempty" visible:"admin"`
-    CreatedAt              *time.Time   `json:"-" visible:"admin"`
-    UpdatedAt              *time.Time   `json:"-" visible:"admin"`
-    DeletedAt              *null.Time   `json:"-" visible:"admin"`
+    ...
 }
+```
+
+To convert a model to a view, you can use the `model.View` functionn :
+
+```go
+view := user.View()
 ```
 
 ### Visibility Levels
@@ -130,4 +136,4 @@ func ProductView(product *models.Product) *productView {
 ## Future Improvements
 
 - Implement a utility function to automatically filter fields based on the `visible` tag, reducing boilerplate in handlers.
-- Introduce logging or testing utilities to verify that no sensitive data is leaked inadvertently.
+  - This one might be tricky to implement and the benefits might not be worth the complexity.

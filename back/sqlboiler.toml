@@ -2,6 +2,11 @@ output   = "models"
 wipe     = true
 no-tests = true
 add-enum-types = true
+templates = [
+  "templates/sqlboiler/templates/main",
+  "templates/sqlboiler/templates/test",
+  "templates/custom",
+]
 
 [mysql]
     dbname = "rtyop"

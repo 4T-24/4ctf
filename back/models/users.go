@@ -22,19 +22,61 @@ import (
 	"github.com/volatiletech/strmangle"
 )
 
+// userView is the view displayed to clients.
+type userView struct {
+	ID                     *uint64      `boil:"id" json:"id" toml:"id" yaml:"id" visible:"admin,user,other"`
+	Username               *string      `boil:"username" json:"username" toml:"username" yaml:"username" visible:"admin,user,other"`
+	PasswordHash           *string      `boil:"password_hash" json:"password_hash" toml:"password_hash" yaml:"password_hash" visible:"nobody"`
+	Email                  *string      `boil:"email" json:"email" toml:"email" yaml:"email" visible:"admin,user"`
+	EmailVerified          *bool        `boil:"email_verified" json:"email_verified" toml:"email_verified" yaml:"email_verified" visible:"admin,user"`
+	EmailVerificationToken *null.String `boil:"email_verification_token" json:"email_verification_token,omitempty" toml:"email_verification_token" yaml:"email_verification_token,omitempty" visible:"admin"`
+	IsAdmin                *bool        `boil:"is_admin" json:"is_admin" toml:"is_admin" yaml:"is_admin" visible:"admin"`
+	IsHidden               *bool        `boil:"is_hidden" json:"is_hidden" toml:"is_hidden" yaml:"is_hidden" visible:"admin"`
+	CreatedAt              *time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at" visible:"admin"`
+	UpdatedAt              *time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at" visible:"admin"`
+	DeletedAt              *null.Time   `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty" visible:"admin"`
+}
+
+func (o *User) View() *userView {
+	return &userView{
+		ID:                     &o.ID,
+		Username:               &o.Username,
+		PasswordHash:           &o.PasswordHash,
+		Email:                  &o.Email,
+		EmailVerified:          &o.EmailVerified,
+		EmailVerificationToken: &o.EmailVerificationToken,
+		IsAdmin:                &o.IsAdmin,
+		IsHidden:               &o.IsHidden,
+		CreatedAt:              &o.CreatedAt,
+		UpdatedAt:              &o.UpdatedAt,
+		DeletedAt:              &o.DeletedAt,
+	}
+}
+
 // User is an object representing the database table.
 type User struct {
-	ID                     uint64      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Username               string      `boil:"username" json:"username" toml:"username" yaml:"username"`
-	PasswordHash           string      `boil:"password_hash" json:"password_hash" toml:"password_hash" yaml:"password_hash"`
-	Email                  string      `boil:"email" json:"email" toml:"email" yaml:"email"`
-	EmailVerified          bool        `boil:"email_verified" json:"email_verified" toml:"email_verified" yaml:"email_verified"`
+	// visible:"admin,user,other"
+	ID uint64 `boil:"id" json:"id" toml:"id" yaml:"id"`
+	// visible:"admin,user,other"
+	Username string `boil:"username" json:"username" toml:"username" yaml:"username"`
+	// visible:"nobody"
+	PasswordHash string `boil:"password_hash" json:"password_hash" toml:"password_hash" yaml:"password_hash"`
+	// visible:"admin,user"
+	Email string `boil:"email" json:"email" toml:"email" yaml:"email"`
+	// visible:"admin,user"
+	EmailVerified bool `boil:"email_verified" json:"email_verified" toml:"email_verified" yaml:"email_verified"`
+	// visible:"admin"
 	EmailVerificationToken null.String `boil:"email_verification_token" json:"email_verification_token,omitempty" toml:"email_verification_token" yaml:"email_verification_token,omitempty"`
-	IsAdmin                bool        `boil:"is_admin" json:"is_admin" toml:"is_admin" yaml:"is_admin"`
-	IsHidden               bool        `boil:"is_hidden" json:"is_hidden" toml:"is_hidden" yaml:"is_hidden"`
-	CreatedAt              time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt              time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	DeletedAt              null.Time   `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
+	// visible:"admin"
+	IsAdmin bool `boil:"is_admin" json:"is_admin" toml:"is_admin" yaml:"is_admin"`
+	// visible:"admin"
+	IsHidden bool `boil:"is_hidden" json:"is_hidden" toml:"is_hidden" yaml:"is_hidden"`
+	// visible:"admin"
+	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	// visible:"admin"
+	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	// visible:"admin"
+	DeletedAt null.Time `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`

@@ -22,6 +22,27 @@ import (
 	"github.com/volatiletech/strmangle"
 )
 
+// userSessionView is the view displayed to clients.
+type userSessionView struct {
+	ID        *uint64    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	UserID    *uint64    `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	ExpiresAt *time.Time `boil:"expires_at" json:"expires_at" toml:"expires_at" yaml:"expires_at"`
+	CreatedAt *time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt *time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt *null.Time `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
+}
+
+func (o *UserSession) View() *userSessionView {
+	return &userSessionView{
+		ID:        &o.ID,
+		UserID:    &o.UserID,
+		ExpiresAt: &o.ExpiresAt,
+		CreatedAt: &o.CreatedAt,
+		UpdatedAt: &o.UpdatedAt,
+		DeletedAt: &o.DeletedAt,
+	}
+}
+
 // UserSession is an object representing the database table.
 type UserSession struct {
 	ID        uint64    `boil:"id" json:"id" toml:"id" yaml:"id"`
