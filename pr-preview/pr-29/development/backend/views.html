@@ -18,7 +18,7 @@
     
     
       
-        <title>Views Package - Documentation</title>
+        <title>Model views - Documentation</title>
       
     
     
@@ -60,7 +60,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#views-package" class="md-skip">
+        <a href="#model-views" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +96,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Views Package
+              Model views
             
           </span>
         </div>
@@ -401,7 +401,7 @@
           
   
   <span class="md-ellipsis">
-    Views Package
+    Model views
   </span>
   
 
@@ -412,7 +412,7 @@
         
   
   <span class="md-ellipsis">
-    Views Package
+    Model views
   </span>
   
 
@@ -714,24 +714,24 @@
                   
 
 
-<h1 id="views-package">Views Package</h1>
-<p>The <code>views</code> package provides a flexible and secure system for controlling the visibility of fields when serializing data in your API. This system ensures that different roles or contexts receive only the necessary data.</p>
+<h1 id="model-views">Model views</h1>
+<p>When generated, models will produce a struct that contains all the fields of the table, and will also produce the same struct with all optional fields.</p>
 <h2 id="overview">Overview</h2>
 <p>A <strong>view</strong> is a struct that defines which fields should be serialized and sent to the user, based on their visibility level. Each field in a view has a <code>visible</code> tag that specifies the roles or contexts in which the field should be included.</p>
-<p>For example, the <code>userView</code> struct controls the serialization of user data:</p>
+<p>Those tags are controlled by the comment in the SQL schema, for example:</p>
+<pre><code class="language-sql">CREATE TABLE users (
+    id SERIAL PRIMARY KEY COMMENT 'visible:&quot;admin,user,other&quot;',
+    ...
+);
+</code></pre>
+<p>This will generate the following view :</p>
 <pre><code class="language-go">type userView struct {
     ID                     *uint64      `json:&quot;id,omitempty&quot; visible:&quot;admin,user,other&quot;`
-    Username               *string      `json:&quot;username,omitempty&quot; visible:&quot;admin,user,other&quot;`
-    PasswordHash           *string      `json:&quot;password_hash,omitempty&quot; visible:&quot;nobody&quot;`
-    Email                  *string      `json:&quot;email,omitempty&quot; visible:&quot;admin,user&quot;`
-    EmailVerified          *bool        `json:&quot;email_verified,omitempty&quot; visible:&quot;admin,user&quot;`
-    EmailVerificationToken *null.String `json:&quot;email_verification_token,omitempty&quot; visible:&quot;admin&quot;`
-    IsAdmin                *bool        `json:&quot;is_admin,omitempty&quot; visible:&quot;admin&quot;`
-    IsHidden               *bool        `json:&quot;is_hidden,omitempty&quot; visible:&quot;admin&quot;`
-    CreatedAt              *time.Time   `json:&quot;-&quot; visible:&quot;admin&quot;`
-    UpdatedAt              *time.Time   `json:&quot;-&quot; visible:&quot;admin&quot;`
-    DeletedAt              *null.Time   `json:&quot;-&quot; visible:&quot;admin&quot;`
+    ...
 }
+</code></pre>
+<p>To convert a model to a view, you can use the <code>model.View</code> functionn :</p>
+<pre><code class="language-go">view := user.View()
 </code></pre>
 <h3 id="visibility-levels">Visibility Levels</h3>
 <ul>
@@ -823,7 +823,7 @@ func ProductView(product *models.Product) *productView {
 <h2 id="future-improvements">Future Improvements</h2>
 <ul>
 <li>Implement a utility function to automatically filter fields based on the <code>visible</code> tag, reducing boilerplate in handlers.</li>
-<li>Introduce logging or testing utilities to verify that no sensitive data is leaked inadvertently.</li>
+<li>This one might be tricky to implement and the benefits might not be worth the complexity.</li>
 </ul>
 
 
