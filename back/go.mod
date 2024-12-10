@@ -6,7 +6,7 @@ toolchain go1.23.4
 
 require (
 	github.com/BurntSushi/toml v1.4.0
-	github.com/amacneil/dbmate/v2 v2.23.0
+	github.com/amacneil/dbmate/v2 v2.24.0
 	github.com/friendsofgo/errors v0.9.2
 	github.com/gorilla/securecookie v1.1.2
 	github.com/nicksnyder/go-i18n/v2 v2.4.1
@@ -53,7 +53,7 @@ require (
 	github.com/volatiletech/randomize v0.0.1 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
-	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
+	golang.org/x/exp v0.0.0-20241204233417-43b7b7cde48d // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
