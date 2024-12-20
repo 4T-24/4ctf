@@ -1,0 +1,3 @@
+[submodule "back/templates/sqlboiler"]
+	path = back/templates/sqlboiler
+	url = https://github.com/volatiletech/sqlboiler

@@ -1,0 +1,17 @@
+output   = "models"
+wipe     = true
+no-tests = true
+add-enum-types = true
+templates = [
+  "templates/sqlboiler/templates/main",
+  "templates/sqlboiler/templates/test",
+  "templates/custom",
+]
+
+[mysql]
+    dbname = "rtyop"
+    host = "127.0.0.1"
+    user = "rtyop"
+    pass = "rtyop"
+    sslmode = "false"
+    blacklist = [ "schema_migrations" ]
