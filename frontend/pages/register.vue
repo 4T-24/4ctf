@@ -57,11 +57,11 @@
         <FloatLabel variant="on">
           <IconField>
             <InputIcon class="pi pi-lock" />
-            <InputText
+            <Password
               id="password"
               name="password"
-              type="text"
               fluid
+              toggleMask
               v-model="userLogin.password"
             />
             <label for="password">Password</label></IconField

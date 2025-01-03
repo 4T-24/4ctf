@@ -8,9 +8,14 @@
 <script lang="ts" setup>
 import Menubar from 'primevue/menubar';
 const items = ref([
-    {
+{
         label: 'Home',
-        icon: 'pi pi-home'
+        icon: 'pi pi-home',
+        url: '/'
+    },{
+        label: 'Login',
+        icon: 'pi pi-user',
+        url: '/login'
     },
     {
         label: 'Features',
