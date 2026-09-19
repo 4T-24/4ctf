@@ -13,7 +13,7 @@ services:
       - "${MYSQL_PORT}:3306"
 
   phpmyadmin:
-    image: phpmyadmin:5.2@sha256:3483eea0cdfe5a4a67cd1030f8e5f1cce291fcade2a8eb18fbec7f91c54d6bf1
+    image: phpmyadmin:5.2@sha256:9e915766488a0f603183367a4b51f5db6309ea801f3eaa25138a83815772b14f
     restart: always
     environment:
       PMA_HOST: mariadb
